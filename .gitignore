@@ -1,0 +1,8 @@
+.vs
+*.VC.db
+Win32/
+Debug/
+Release/
+pjsipdemo/Debug/
+pjsipdemo/Release/
+
