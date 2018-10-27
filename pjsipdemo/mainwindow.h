@@ -15,19 +15,37 @@ public:
 	MainWindow(QWidget *parent = 0);
 	~MainWindow();
 
-public:
-    void log(QString msg);
+private:
+    void initTop();
+    void initMid();
+    void initBottom();
 
 signals:
     void postLog(QString log);
 
 public slots:
+    void log(QString msg);
+
+    void onVersion();
+
     void onInit();
     void onDestory();
+    void onPreview();
+    void onRegister();
     void onCall();
     void onHangUp();
 
 private:
+    QLineEdit *_server;
+    QLineEdit *_port;
+    QLineEdit *_protocol;
+
+    QLineEdit *_turnServer;
+    QLineEdit *_turnServerPort;
+
+    QLineEdit *_accountID;
+    QLineEdit *_accountName;
+
     QWidget *_videoWidget;
 };
 

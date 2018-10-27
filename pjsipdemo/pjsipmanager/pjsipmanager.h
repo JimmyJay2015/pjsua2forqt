@@ -5,16 +5,24 @@
 //  Created by Jimmy on 10/26/18.
 //
 //
-
-
 #ifndef PJSIPMANAGER_H
 #define PJSIPMANAGER_H
 
 #include <pjsua2.hpp>
-//#include <pjsua2/account.hpp>
+
+#include <QObject>
+#include <QtCore>
 
 
-class PjsipAccount : public pj::Account {
+#define LOG(x) (emit PjsipManager::shareInstance()->log(x));
+
+
+class PjsipEndpoint : public pj::Endpoint {
+
+};
+
+
+class PjsipBuddy : public pj::Buddy {
 
 };
 
@@ -23,18 +31,36 @@ class PjsipAccount : public pj::Account {
 
 
 
-
-
-
-
-class PjsipManager  {
-
+class PjsipManager : public QObject  {
+    Q_OBJECT
 public:
-	PjsipManager();
-	~PjsipManager();
+    static PjsipManager *shareInstance();
+    ~PjsipManager();
+
+    void init();
+    void deinit();
 
 private:
-	
+	PjsipManager();
+
+signals:
+    void log(QString);
+
+public: // api
+    QString pjLibVersion();
+
+    void previewVideo();
+
+    bool createMyAccount(QString uid, QString name, QString sipserver, QString turnserver, qint32 turnport);
+    bool makeCall(QString server, qint32 serverport);
+
+
+private:
+    bool _inited;
+
+    pj::TransportId _tid;
+    pj::Account *_account;
+
 };
 
 #endif

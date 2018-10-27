@@ -1,9 +1,214 @@
-﻿#include "pjsipmanager.h"
+﻿//
+//  pjsipmanager.cpp
+//  pjsip demo
+//
+//  Created by Jimmy on 10/26/18.
+//
+//
+#include "pjsipmanager.h"
 
-PjsipManager::PjsipManager() {
+#include "pjsuaaccount.h"
+#include "pjsuacall.h"
+
+#include <QDebug>
+
+#include <mutex>
+
+
+#include <QWidget>
+#include <windows.h>
+
+
+PjsipManager *PjsipManager::shareInstance() {
+    static PjsipManager *instance = nullptr;
+    static std::once_flag onceTag;
+    std::call_once(onceTag, []() {
+        if (!instance) {
+            instance = new PjsipManager();
+        }
+    });
+    return instance;
+}
+
+PjsipManager::PjsipManager() : QObject(nullptr)
+
+, _inited(false)
+
+, _account(nullptr)
+
+{
 	
 }
 
 PjsipManager::~PjsipManager() {
-	
+    deinit();
 }
+
+void PjsipManager::init() {
+    if (_inited) {
+        emit log(QString("pjlib already inited"));
+        return;
+    }
+    PjsipEndpoint *ep = new PjsipEndpoint();
+    try {
+        ep->libCreate();
+    } catch (pj::Error &error) {
+        emit log(QString("pjlib create failed: %1").arg(QString::fromStdString(error.info())));
+        return;
+    }
+
+    pj::EpConfig ecfg;
+    //ecfg.logConfig.level = 4;
+    ecfg.uaConfig.maxCalls = 1;
+    try {
+        ep->libInit(ecfg);
+    } catch (pj::Error &error) {
+        emit log(QString("pjlib init failed: %1").arg(QString::fromStdString(error.info())));
+        ep->libDestroy();
+        return;
+    }
+
+    try {
+        pj::TransportConfig tcfg;
+        //_tid = ep->transportCreate(PJSIP_TRANSPORT_TCP, tcfg);
+        _tid = ep->transportCreate(PJSIP_TRANSPORT_UDP, tcfg);
+    } catch (pj::Error &error) {
+        emit log(QString("pjlib create transport failed: %1").arg(QString::fromStdString(error.info())));
+        ep->libDestroy();
+        return;
+    }
+
+    try {
+        ep->libStart();
+    } catch (pj::Error &error) {
+        emit log(QString("pjlib start failed: %1").arg(QString::fromStdString(error.info())));
+        ep->libDestroy();
+        return;
+    }
+
+    emit log("pjlib started!");
+
+    _inited = true;
+}
+
+void PjsipManager::deinit() {
+    if (!_inited) {
+        emit log("pjlib not init yet!");
+        return;
+    }
+
+    if (_account) {
+        delete _account;
+        _account = nullptr;
+    }
+
+    pj::Endpoint::instance().libDestroy();
+    delete &(pj::Endpoint::instance());
+
+    _inited = false;
+    emit log("pjlib destoryed!");
+}
+
+QString PjsipManager::pjLibVersion() {
+    pj::Version pv = pj::Endpoint::instance().libVersion();
+    return QString::fromStdString(pv.full);
+}
+
+void PjsipManager::previewVideo() {
+
+    pjsua_vid_win_id wid;
+    pjsua_vid_win_info winfo;
+    pj_status_t status;
+
+    // 创建预览界面，预览默认的摄像头
+    status = pjsua_vid_preview_start(PJMEDIA_VID_DEFAULT_CAPTURE_DEV, NULL);
+    if (status != PJ_SUCCESS) {
+        LOG(QString("preview local video failed! %1").arg(status));
+        return;
+    }
+
+    // 获取默认摄像头的 预览 winid
+    wid = pjsua_vid_preview_get_win(PJMEDIA_VID_DEFAULT_CAPTURE_DEV);
+    // 获取 winid 的 win info
+    pjsua_vid_win_get_info(wid, &winfo);
+
+    // win info 中取出 hwnd，设为 QWidget 的子窗口
+    QWidget *w = new QWidget();
+    SetParent((HWND)(winfo.hwnd.info.win.hwnd), (HWND)w->winId());
+    MoveWindow((HWND)(winfo.hwnd.info.win.hwnd), 0, 0, 300, 300, true);
+
+    // 最后 show() 
+    w->show();
+}
+
+/////////////////////////
+bool PjsipManager::createMyAccount(QString uid, QString name, QString sipserver, QString turnserver, qint32 turnport) {
+    if (!_inited) {
+        emit log("pjlib not init!");
+        return false;
+    }
+
+    pj::TransportInfo ti = pj::Endpoint::instance().transportGetInfo(_tid);
+    QString localAddress = QString::fromStdString(pj::Endpoint::instance().transportGetInfo(_tid).localName);
+    QString acountID = QString("%1<sip:%2@%3>").arg(name).arg(uid).arg(localAddress);
+
+    pj::AccountConfig acfg;
+    acfg.idUri = acountID.toStdString();
+    acfg.videoConfig.defaultCaptureDevice = PJMEDIA_VID_DEFAULT_CAPTURE_DEV;
+    acfg.videoConfig.defaultRenderDevice = PJMEDIA_VID_DEFAULT_RENDER_DEV;
+    acfg.videoConfig.autoShowIncoming = PJ_TRUE;
+    acfg.videoConfig.autoTransmitOutgoing = PJ_TRUE;
+
+    if (!sipserver.isEmpty()) {
+        acfg.regConfig.registrarUri = QString("sip:%1").arg(sipserver).toStdString();
+    }
+
+    // 启用 turn server
+    if (!turnserver.isEmpty() && turnport > 0) {
+        acfg.natConfig.iceEnabled = true;
+        acfg.natConfig.turnEnabled = true;
+        acfg.natConfig.turnServer = QString("%1:%2").arg(turnserver).arg(turnport).toStdString();
+        acfg.natConfig.turnConnType = PJ_TURN_TP_UDP;
+    }
+
+    _account = new PjsuaAccount();
+    try {
+        _account->create(acfg, true);
+    } catch (pj::Error &error) {
+        emit log(QString("create account failed: %1").arg(QString::fromStdString(error.info())));
+        return false;
+    }
+
+    return true;
+}
+
+bool PjsipManager::makeCall(QString server, qint32 serverport) {
+    
+    QString remoteid = QString("sip:%1@%2:%3").arg(rand()).arg(server).arg(serverport);
+
+    PjsuaCall *pc = new PjsuaCall(*_account);
+
+    pj::CallOpParam prm(true);
+    prm.opt.videoCount = 1;
+
+    try {
+        pc->makeCall(remoteid.toStdString(), prm);
+    } catch (pj::Error &error) {
+        emit log(QString("make call failed: %1").arg(QString::fromStdString(error.info())));
+        return false;
+    }
+
+    return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+

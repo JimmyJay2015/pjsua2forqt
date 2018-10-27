@@ -52,6 +52,18 @@
     <ClCompile Include="pjsipmanager\pjsipmanager.cpp">
       <Filter>pjsipmanager</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\_protocbuf_parser\GeneratedFiles\Debug\moc_pjsipmanager.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\_protocbuf_parser\GeneratedFiles\Release\moc_pjsipmanager.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="pjsipmanager\pjsuaaccount.cpp">
+      <Filter>pjsipmanager</Filter>
+    </ClCompile>
+    <ClCompile Include="pjsipmanager\pjsuacall.cpp">
+      <Filter>pjsipmanager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="mainwindow.h">
@@ -60,9 +72,15 @@
     <CustomBuild Include="mainwindow.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="pjsipmanager\pjsipmanager.h">
+      <Filter>pjsipmanager</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pjsipmanager\pjsipmanager.h">
+    <ClInclude Include="pjsipmanager\pjsuaaccount.h">
+      <Filter>pjsipmanager</Filter>
+    </ClInclude>
+    <ClInclude Include="pjsipmanager\pjsuacall.h">
       <Filter>pjsipmanager</Filter>
     </ClInclude>
   </ItemGroup>

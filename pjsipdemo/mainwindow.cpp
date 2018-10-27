@@ -5,6 +5,9 @@
 
 #include <QDebug>
 
+#include "pjsipmanager/pjsipmanager.h"
+
+
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -19,12 +22,37 @@ MainWindow::MainWindow(QWidget *parent)
 
     QHBoxLayout *tfLayout = new QHBoxLayout();
     tfLayout->addWidget(new QLabel("server:"));
-    tfLayout->addWidget(new QLineEdit("ip or domain"));
+    _server = new QLineEdit("ip or domain");
+    tfLayout->addWidget(_server);
     tfLayout->addWidget(new QLabel("port"));
-    tfLayout->addWidget(new QLineEdit(""));
-    tfLayout->addWidget(new QLabel("sc"));
-    tfLayout->addWidget(new QLineEdit("tcp or udp"));
+    _port = new QLineEdit("");
+    tfLayout->addWidget(_port);
+    tfLayout->addWidget(new QLabel("protocol"));
+    _protocol = new QLineEdit("tcp or udp");
+    tfLayout->addWidget(_protocol);
     topLayout->addLayout(tfLayout);
+
+
+    QHBoxLayout *tf1 = new QHBoxLayout();
+    tf1->addWidget(new QLabel("turn server:"));
+    _turnServer = new QLineEdit("");
+    tf1->addWidget(_turnServer);
+
+    tf1->addWidget(new QLabel("turn server port:"));
+    _turnServerPort = new QLineEdit("");
+    tf1->addWidget(_turnServerPort);
+    topLayout->addLayout(tf1);
+
+
+    QHBoxLayout *tf2 = new QHBoxLayout();
+    tf2->addWidget(new QLabel("user id:"));
+    _accountID = new QLineEdit("id");
+    tf2->addWidget(_accountID);
+
+    tf2->addWidget(new QLabel("user name:"));
+    _accountName = new QLineEdit("name to display");
+    tf2->addWidget(_accountName);
+    topLayout->addLayout(tf2);
 
     QHBoxLayout *tsLayout = new QHBoxLayout();
 
@@ -36,13 +64,27 @@ MainWindow::MainWindow(QWidget *parent)
     connect(destorySip, &QPushButton::clicked, this, &MainWindow::onDestory);
     tsLayout->addWidget(destorySip);
 
+    QPushButton *preview = new QPushButton("preview local video");
+    connect(preview, &QPushButton::clicked, this, &MainWindow::onPreview);
+    tsLayout->addWidget(preview);
+
+
+    QPushButton *addCount = new QPushButton("register account");
+    connect(addCount, &QPushButton::clicked, this, &MainWindow::onRegister);
+    tsLayout->addWidget(addCount, 1, Qt::AlignRight);
+
     QPushButton *make = new QPushButton("make call");
     connect(make, &QPushButton::clicked, this, &MainWindow::onCall);
-    tsLayout->addWidget(make, 0, Qt::AlignRight);
+    tsLayout->addWidget(make, 1, Qt::AlignRight);
 
     QPushButton *huangup = new QPushButton("hang up call");
     connect(huangup, &QPushButton::clicked, this, &MainWindow::onHangUp);
-    tsLayout->addWidget(huangup, 0, Qt::AlignRight);
+    tsLayout->addWidget(huangup, 1, Qt::AlignRight);
+
+
+    QPushButton *version = new QPushButton("sip version");
+    connect(version, &QPushButton::clicked, this, &MainWindow::onVersion);
+    tsLayout->addWidget(version, 1, Qt::AlignRight);
 
     topLayout->addLayout(tsLayout);
 
@@ -65,6 +107,14 @@ MainWindow::MainWindow(QWidget *parent)
     mainLayout->addWidget(log);
 
     centralWidget()->setLayout(mainLayout);
+
+    connect(PjsipManager::shareInstance(), &PjsipManager::log, this, &MainWindow::log);
+}
+void MainWindow::initTop() {
+}
+void MainWindow::initMid() {
+}
+void MainWindow::initBottom() {
 }
 
 MainWindow::~MainWindow()
@@ -77,18 +127,50 @@ void MainWindow::log(QString msg) {
 }
 
 void MainWindow::onInit() {
-    qDebug() << "onInit";
-    log("onInit");
+    PjsipManager::shareInstance()->init();
 }
 void MainWindow::onDestory() {
-    qDebug() << "onDestory";
-    log("onDestory");
+    PjsipManager::shareInstance()->deinit();
 }
+void MainWindow::onPreview() {
+    PjsipManager::shareInstance()->previewVideo();
+}
+
+void MainWindow::onVersion() {
+    log(QString("pjlib version:%1").arg(PjsipManager::shareInstance()->pjLibVersion()));
+}
+
+void MainWindow::onRegister() {
+    QString uid = _accountID->text();
+    if (uid.isEmpty()) {
+        log("input id first");
+        _accountID->setFocus();
+        return;
+    }
+    QString name = _accountName->text();
+    if (name.isEmpty()) {
+        log("input name first");
+        _accountName->setFocus();
+        return;
+    }
+
+    QString turnserver = _turnServer->text();
+    qint32 turnserverport = _turnServerPort->text().toInt();
+
+    QString sipserver;
+    //QString sipserver = _server->text();
+    //qint32 sipport = _port->text().toInt();
+
+    PjsipManager::shareInstance()->createMyAccount(uid, name, sipserver, turnserver, turnserverport);
+}
+
 void MainWindow::onCall() {
-    qDebug() << "onCall";
-    log("onCall");
+    QString sipserver = _server->text();
+    qint32 sipport = _port->text().toInt();
+
+    PjsipManager::shareInstance()->makeCall(sipserver, sipport);
+
 }
 void MainWindow::onHangUp() {
-    qDebug() << "onHangUp";
     log("onHangUp");
 }
