@@ -113,6 +113,35 @@ QString PjsipManager::pjLibVersion() {
     return QString::fromStdString(pv.full);
 }
 
+QString PjsipManager::codecInfoString() {
+    QString result;
+    result.append("********** codec info ************\n");
+
+    pjsua_codec_info codecs[100] = {0};
+    unsigned count = 100;
+    pj_status_t ret = pjsua_vid_enum_codecs(codecs, &count);
+    if (ret!= PJ_SUCCESS) {
+        result.append(QString("enum video codecs failed: %1\n").arg(ret));
+        result.append("*********************************\n");
+        return result;
+    }
+
+    result.append(QString("enum %1 video codecs\n").arg(count));
+
+    for (unsigned i = 0; i < count; i++) {
+        pjsua_codec_info ci = codecs[i];
+        std::string idString(ci.codec_id.ptr, ci.codec_id.slen);
+        result.append(QString(">>>id: %1\n").arg(QString::fromStdString(idString)));
+        result.append(QString("priority: %1\n").arg(ci.priority));
+        std::string decString(ci.desc.ptr, ci.desc.slen);
+        result.append(QString("description: %1\n").arg(QString::fromStdString(decString)));
+        result.append(">>>>>>>>>>>>>\n");
+    }
+
+    result.append("*********************************\n");
+    return result;
+}
+
 bool PjsipManager::stopPreviewVideo() {
     if (_previewVideo) {
         _previewVideo->setParent(nullptr);
@@ -179,8 +208,8 @@ bool PjsipManager::createMyAccount(QString uid, QString name, QString sipserver,
 
     pj::AccountConfig acfg;
     acfg.idUri = acountID.toStdString();
-    acfg.videoConfig.defaultCaptureDevice = PJMEDIA_VID_DEFAULT_CAPTURE_DEV;
-    acfg.videoConfig.defaultRenderDevice = PJMEDIA_VID_DEFAULT_RENDER_DEV;
+    //acfg.videoConfig.defaultCaptureDevice = PJMEDIA_VID_DEFAULT_CAPTURE_DEV;
+    //acfg.videoConfig.defaultRenderDevice = PJMEDIA_VID_DEFAULT_RENDER_DEV;
     acfg.videoConfig.autoShowIncoming = PJ_TRUE;
     acfg.videoConfig.autoTransmitOutgoing = PJ_TRUE;
 

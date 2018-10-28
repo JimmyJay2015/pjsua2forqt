@@ -35,7 +35,6 @@ void PjvidWidget::init() {
         MoveWindow(_vidWindow, 0, 0, 300, 300, true);
         resize(300, 300);
     }
-
     ShowWindow(_vidWindow, SW_SHOW);
 }
 

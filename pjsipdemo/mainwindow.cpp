@@ -68,7 +68,7 @@ void MainWindow::initTop() {
     _accountName = new QLineEdit("name to display");
     tf2->addWidget(_accountName);
     tf2->addWidget(new QLabel("room id:"));
-    _roomID = new QLineEdit("room to join");
+    _roomID = new QLineEdit("");
     tf2->addWidget(_roomID);
     topLayout->addLayout(tf2);
 
@@ -81,6 +81,10 @@ void MainWindow::initTop() {
     QPushButton *destorySip = new QPushButton("destory");
     connect(destorySip, &QPushButton::clicked, this, &MainWindow::onDestory);
     tsLayout->addWidget(destorySip);
+
+    QPushButton *showCodec = new QPushButton("codec");
+    connect(showCodec, &QPushButton::clicked, this, &MainWindow::onCodec);
+    tsLayout->addWidget(showCodec);
 
     _previewBtn = new QPushButton("preview local video");
     _previewBtn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -152,6 +156,9 @@ void MainWindow::onInit() {
 }
 void MainWindow::onDestory() {
     PjsipManager::shareInstance()->deinit();
+}
+void MainWindow::onCodec() {
+    log(PjsipManager::shareInstance()->codecInfoString());
 }
 void MainWindow::onPreview() {
     if (PjsipManager::shareInstance()->stopPreviewVideo()) {
