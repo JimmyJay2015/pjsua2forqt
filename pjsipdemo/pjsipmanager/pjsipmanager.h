@@ -52,7 +52,7 @@ public: // api
 
     bool createMyAccount(QString uid, QString name, QString sipserver, QString turnserver, qint32 turnport);
     
-    bool makeCall(QString server, qint32 serverport, QWidget *videoParent);
+    bool makeCall(QString server, qint32 serverport, QString roomid, QWidget *videoParent);
     bool hangupAllCall();
 
 

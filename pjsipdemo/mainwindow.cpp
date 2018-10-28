@@ -67,6 +67,9 @@ void MainWindow::initTop() {
     tf2->addWidget(new QLabel("user name:"));
     _accountName = new QLineEdit("name to display");
     tf2->addWidget(_accountName);
+    tf2->addWidget(new QLabel("room id:"));
+    _roomID = new QLineEdit("room to join");
+    tf2->addWidget(_roomID);
     topLayout->addLayout(tf2);
 
     QHBoxLayout *tsLayout = new QHBoxLayout();
@@ -197,7 +200,9 @@ void MainWindow::onCall() {
     QString sipserver = _server->text();
     qint32 sipport = _port->text().toInt();
 
-    PjsipManager::shareInstance()->makeCall(sipserver, sipport, _sipVideoWidget);
+    QString roomid = _roomID->text();
+
+    PjsipManager::shareInstance()->makeCall(sipserver, sipport, roomid, _sipVideoWidget);
 
 }
 void MainWindow::onHangUp() {

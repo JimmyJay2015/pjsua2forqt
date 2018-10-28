@@ -208,13 +208,15 @@ bool PjsipManager::createMyAccount(QString uid, QString name, QString sipserver,
     return true;
 }
 
-bool PjsipManager::makeCall(QString server, qint32 serverport, QWidget *videoParent) {
+bool PjsipManager::makeCall(QString server, qint32 serverport, QString roomid, QWidget *videoParent) {
     if (!_inited) {
         emit log("pjlib not init!");
         return false;
     }
-
-    QString remoteid = QString("sip:%1@%2:%3").arg(rand()).arg(server).arg(serverport);
+    if (roomid.isEmpty()) {
+        roomid.setNum(rand());
+    }
+    QString remoteid = QString("sip:%1@%2:%3").arg(roomid).arg(server).arg(serverport);
 
     PjsuaCall *pc = new PjsuaCall(*_account, videoParent);
 

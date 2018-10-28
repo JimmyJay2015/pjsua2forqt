@@ -45,6 +45,7 @@ private:
 
     QLineEdit *_accountID;
     QLineEdit *_accountName;
+    QLineEdit *_roomID;
 
     QPushButton *_previewBtn;
 
