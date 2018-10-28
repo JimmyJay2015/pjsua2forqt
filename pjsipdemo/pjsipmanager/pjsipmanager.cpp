@@ -115,27 +115,46 @@ QString PjsipManager::pjLibVersion() {
 
 QString PjsipManager::codecInfoString() {
     QString result;
-    result.append("********** codec info ************\n");
+    result.append("********** video codec info ************\n");
 
-    pjsua_codec_info codecs[100] = {0};
-    unsigned count = 100;
-    pj_status_t ret = pjsua_vid_enum_codecs(codecs, &count);
-    if (ret!= PJ_SUCCESS) {
+    pjsua_codec_info videoCodecs[100] = {0};
+    unsigned videoCount = 100;
+    pj_status_t ret = pjsua_vid_enum_codecs(videoCodecs, &videoCount);
+    if (ret != PJ_SUCCESS) {
         result.append(QString("enum video codecs failed: %1\n").arg(ret));
-        result.append("*********************************\n");
-        return result;
+    } else {
+        result.append(QString("enum %1 video codecs\n").arg(videoCount));
+
+        for (unsigned i = 0; i < videoCount; i++) {
+            pjsua_codec_info ci = videoCodecs[i];
+            std::string idString(ci.codec_id.ptr, ci.codec_id.slen);
+            result.append(QString(">>>id: %1\n").arg(QString::fromStdString(idString)));
+            result.append(QString("priority: %1\n").arg(ci.priority));
+            std::string decString(ci.desc.ptr, ci.desc.slen);
+            result.append(QString("description: %1\n").arg(QString::fromStdString(decString)));
+            result.append(">>>>>>>>>>>>>\n");
+        }
     }
 
-    result.append(QString("enum %1 video codecs\n").arg(count));
+    result.append("********** audio codec info ************\n");
 
-    for (unsigned i = 0; i < count; i++) {
-        pjsua_codec_info ci = codecs[i];
-        std::string idString(ci.codec_id.ptr, ci.codec_id.slen);
-        result.append(QString(">>>id: %1\n").arg(QString::fromStdString(idString)));
-        result.append(QString("priority: %1\n").arg(ci.priority));
-        std::string decString(ci.desc.ptr, ci.desc.slen);
-        result.append(QString("description: %1\n").arg(QString::fromStdString(decString)));
-        result.append(">>>>>>>>>>>>>\n");
+    pjsua_codec_info audioCodecs[100] = { 0 };
+    unsigned audioCount = 100;
+    ret = pjsua_enum_codecs(audioCodecs, &audioCount);
+    if (ret != PJ_SUCCESS) {
+        result.append(QString("enum audio codecs failed: %1\n").arg(ret));
+    } else {
+        result.append(QString("enum %1 audio codecs\n").arg(audioCount));
+
+        for (unsigned i = 0; i < audioCount; i++) {
+            pjsua_codec_info ci = audioCodecs[i];
+            std::string idString(ci.codec_id.ptr, ci.codec_id.slen);
+            result.append(QString(">>>id: %1\n").arg(QString::fromStdString(idString)));
+            result.append(QString("priority: %1\n").arg(ci.priority));
+            std::string decString(ci.desc.ptr, ci.desc.slen);
+            result.append(QString("description: %1\n").arg(QString::fromStdString(decString)));
+            result.append(">>>>>>>>>>>>>\n");
+        }
     }
 
     result.append("*********************************\n");
