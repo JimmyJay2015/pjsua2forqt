@@ -46,6 +46,8 @@ private:
     QLineEdit *_accountID;
     QLineEdit *_accountName;
 
+    QPushButton *_previewBtn;
+
     QWidget *_videoWidget;
 };
 

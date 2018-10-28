@@ -64,6 +64,15 @@
     <ClCompile Include="pjsipmanager\pjsuacall.cpp">
       <Filter>pjsipmanager</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\_protocbuf_parser\GeneratedFiles\Debug\moc_pjvidwidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\_protocbuf_parser\GeneratedFiles\Release\moc_pjvidwidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="pjsipmanager\pjvidwidget_win.cpp">
+      <Filter>pjsipmanager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="mainwindow.h">
@@ -73,6 +82,9 @@
       <Filter>Resource Files</Filter>
     </CustomBuild>
     <CustomBuild Include="pjsipmanager\pjsipmanager.h">
+      <Filter>pjsipmanager</Filter>
+    </CustomBuild>
+    <CustomBuild Include="pjsipmanager\pjvidwidget.h">
       <Filter>pjsipmanager</Filter>
     </CustomBuild>
   </ItemGroup>

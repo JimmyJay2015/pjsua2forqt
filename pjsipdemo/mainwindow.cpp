@@ -64,9 +64,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(destorySip, &QPushButton::clicked, this, &MainWindow::onDestory);
     tsLayout->addWidget(destorySip);
 
-    QPushButton *preview = new QPushButton("preview local video");
-    connect(preview, &QPushButton::clicked, this, &MainWindow::onPreview);
-    tsLayout->addWidget(preview);
+    _previewBtn = new QPushButton("preview local video");
+    connect(_previewBtn, &QPushButton::clicked, this, &MainWindow::onPreview);
+    tsLayout->addWidget(_previewBtn);
 
 
     QPushButton *addCount = new QPushButton("register account");
@@ -133,7 +133,19 @@ void MainWindow::onDestory() {
     PjsipManager::shareInstance()->deinit();
 }
 void MainWindow::onPreview() {
-    PjsipManager::shareInstance()->previewVideo();
+    if (PjsipManager::shareInstance()->stopPreviewVideo()) {
+        _previewBtn->setText("preview local video");
+    } else {
+        QWidget * preview = PjsipManager::shareInstance()->startPreviewVideo();
+        if (preview) {
+            _previewBtn->setText("stop preview");
+            preview->setParent(_videoWidget);
+            preview->setGeometry(_videoWidget->rect());
+            preview->show();
+        } else {
+            log("can not preview video");
+        }
+    }
 }
 
 void MainWindow::onVersion() {

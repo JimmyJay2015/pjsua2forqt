@@ -9,14 +9,9 @@
 
 #include "pjsuaaccount.h"
 #include "pjsuacall.h"
-
-#include <QDebug>
+#include "pjvidwidget.h"
 
 #include <mutex>
-
-
-#include <QWidget>
-#include <windows.h>
 
 
 PjsipManager *PjsipManager::shareInstance() {
@@ -35,6 +30,8 @@ PjsipManager::PjsipManager() : QObject(nullptr)
 , _inited(false)
 
 , _account(nullptr)
+
+, _previewVideo(nullptr)
 
 {
 	
@@ -102,6 +99,8 @@ void PjsipManager::deinit() {
         _account = nullptr;
     }
 
+    stopPreviewVideo();
+
     pj::Endpoint::instance().libDestroy();
     delete &(pj::Endpoint::instance());
 
@@ -114,7 +113,23 @@ QString PjsipManager::pjLibVersion() {
     return QString::fromStdString(pv.full);
 }
 
-void PjsipManager::previewVideo() {
+bool PjsipManager::stopPreviewVideo() {
+    if (_previewVideo) {
+        _previewVideo->setParent(nullptr);
+        _previewVideo->deleteLater();
+        _previewVideo = nullptr;
+
+        pjsua_vid_preview_stop(PJMEDIA_VID_DEFAULT_CAPTURE_DEV);
+        return true;
+    }
+    return false;
+}
+
+QWidget *PjsipManager::startPreviewVideo() {
+    if (!_inited) {
+        emit log("pjlib not init!");
+        return nullptr;
+    }
 
     pjsua_vid_win_id wid;
     pjsua_vid_win_info winfo;
@@ -124,7 +139,7 @@ void PjsipManager::previewVideo() {
     status = pjsua_vid_preview_start(PJMEDIA_VID_DEFAULT_CAPTURE_DEV, NULL);
     if (status != PJ_SUCCESS) {
         LOG(QString("preview local video failed! %1").arg(status));
-        return;
+        return nullptr;
     }
 
     // 获取默认摄像头的 预览 winid
@@ -132,13 +147,22 @@ void PjsipManager::previewVideo() {
     // 获取 winid 的 win info
     pjsua_vid_win_get_info(wid, &winfo);
 
-    // win info 中取出 hwnd，设为 QWidget 的子窗口
-    QWidget *w = new QWidget();
-    SetParent((HWND)(winfo.hwnd.info.win.hwnd), (HWND)w->winId());
-    MoveWindow((HWND)(winfo.hwnd.info.win.hwnd), 0, 0, 300, 300, true);
+    stopPreviewVideo();
 
-    // 最后 show() 
-    w->show();
+    // win info 中取出 hwnd，设为 QWidget 的子窗口
+    PjvidWidget *previewVideo = new PjvidWidget((HWND)(winfo.hwnd.info.win.hwnd));
+    previewVideo->hide();
+    previewVideo->init();
+    _previewVideo = previewVideo;
+
+    connect(_previewVideo, &QWidget::destroyed, this, &PjsipManager::onPreviewDestoryed);
+
+    return _previewVideo;
+}
+void PjsipManager::onPreviewDestoryed(QObject *obj) {
+    if (_previewVideo == obj) {
+        _previewVideo = 0;
+    }
 }
 
 /////////////////////////

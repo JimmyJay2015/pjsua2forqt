@@ -29,8 +29,6 @@ class PjsipBuddy : public pj::Buddy {
 
 
 
-
-
 class PjsipManager : public QObject  {
     Q_OBJECT
 public:
@@ -49,18 +47,22 @@ signals:
 public: // api
     QString pjLibVersion();
 
-    void previewVideo();
+    QWidget *startPreviewVideo();
+    bool stopPreviewVideo();
 
     bool createMyAccount(QString uid, QString name, QString sipserver, QString turnserver, qint32 turnport);
     bool makeCall(QString server, qint32 serverport);
 
-
+public slots:
+    void onPreviewDestoryed(QObject *obj);
+    
 private:
     bool _inited;
 
     pj::TransportId _tid;
     pj::Account *_account;
 
+    QWidget *_previewVideo;
 };
 
 #endif
