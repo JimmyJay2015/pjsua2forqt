@@ -14,9 +14,24 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("pjsip demo");
 
     setCentralWidget(new QWidget());
+    centralWidget()->setLayout(new QVBoxLayout());
+    
 
-    QVBoxLayout *mainLayout = new QVBoxLayout();
+    initTop();
+    initMid();
+    initBottom();
 
+
+    connect(PjsipManager::shareInstance(), &PjsipManager::log, this, &MainWindow::log);
+
+    _server->setText("10.10.1.189");
+    _port->setText("5060");
+
+    _protocol->setText("only udp");
+    _protocol->setDisabled(true);
+
+}
+void MainWindow::initTop() {
     QVBoxLayout *topLayout = new QVBoxLayout();
     topLayout->setMargin(10);
 
@@ -65,56 +80,59 @@ MainWindow::MainWindow(QWidget *parent)
     tsLayout->addWidget(destorySip);
 
     _previewBtn = new QPushButton("preview local video");
+    _previewBtn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(_previewBtn, &QPushButton::clicked, this, &MainWindow::onPreview);
     tsLayout->addWidget(_previewBtn);
+
+    tsLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
 
     QPushButton *addCount = new QPushButton("register account");
     connect(addCount, &QPushButton::clicked, this, &MainWindow::onRegister);
-    tsLayout->addWidget(addCount, 1, Qt::AlignRight);
+    tsLayout->addWidget(addCount);
 
     QPushButton *make = new QPushButton("make call");
     connect(make, &QPushButton::clicked, this, &MainWindow::onCall);
-    tsLayout->addWidget(make, 1, Qt::AlignRight);
+    tsLayout->addWidget(make);
 
     QPushButton *huangup = new QPushButton("hang up call");
     connect(huangup, &QPushButton::clicked, this, &MainWindow::onHangUp);
-    tsLayout->addWidget(huangup, 1, Qt::AlignRight);
+    tsLayout->addWidget(huangup);
 
 
     QPushButton *version = new QPushButton("sip version");
     connect(version, &QPushButton::clicked, this, &MainWindow::onVersion);
-    tsLayout->addWidget(version, 1, Qt::AlignRight);
+    tsLayout->addWidget(version);
 
     topLayout->addLayout(tsLayout);
 
-
-    mainLayout->addLayout(topLayout);
-
-    QHBoxLayout *midLayout = new QHBoxLayout();
-    _videoWidget = new QWidget();
-    _videoWidget->setMinimumSize(QSize(300, 300));
-    _videoWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-    _videoWidget->setStyleSheet("border:1px solid lightGray;");
-
-    midLayout->addWidget(_videoWidget, 3, Qt::AlignCenter);
-    mainLayout->addLayout(midLayout);
-
-    QTextEdit *log = new QTextEdit();
-    log->setMaximumHeight(100);
-    log->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
-    connect(this, &MainWindow::postLog, log, &QTextEdit::append);
-    mainLayout->addWidget(log);
-
-    centralWidget()->setLayout(mainLayout);
-
-    connect(PjsipManager::shareInstance(), &PjsipManager::log, this, &MainWindow::log);
-}
-void MainWindow::initTop() {
+    ((QBoxLayout*)centralWidget()->layout())->addLayout(topLayout);
 }
 void MainWindow::initMid() {
+    QHBoxLayout *midLayout = new QHBoxLayout();
+    _previewVideoWidget = new QWidget();
+    _previewVideoWidget->setMinimumSize(QSize(300, 300));
+    _previewVideoWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    _previewVideoWidget->setStyleSheet("border:1px solid lightGray;");
+    _previewVideoWidget->setLayout(new QHBoxLayout());
+    midLayout->addWidget(_previewVideoWidget);
+
+    _sipVideoWidget = new QWidget();
+    _sipVideoWidget->setMinimumSize(QSize(300, 300));
+    _sipVideoWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    _sipVideoWidget->setStyleSheet("border:1px solid lightGray;");
+    _sipVideoWidget->setLayout(new QHBoxLayout());
+    midLayout->addWidget(_sipVideoWidget);
+
+    ((QBoxLayout*)centralWidget()->layout())->addLayout(midLayout);
 }
 void MainWindow::initBottom() {
+    QTextEdit *log = new QTextEdit();
+    log->setMaximumHeight(150);
+    log->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+    connect(this, &MainWindow::postLog, log, &QTextEdit::append);
+
+    ((QBoxLayout*)centralWidget()->layout())->addWidget(log);
 }
 
 MainWindow::~MainWindow()
@@ -139,8 +157,7 @@ void MainWindow::onPreview() {
         QWidget * preview = PjsipManager::shareInstance()->startPreviewVideo();
         if (preview) {
             _previewBtn->setText("stop preview");
-            preview->setParent(_videoWidget);
-            preview->setGeometry(_videoWidget->rect());
+            _previewVideoWidget->layout()->addWidget(preview);
             preview->show();
         } else {
             log("can not preview video");
@@ -180,9 +197,11 @@ void MainWindow::onCall() {
     QString sipserver = _server->text();
     qint32 sipport = _port->text().toInt();
 
-    PjsipManager::shareInstance()->makeCall(sipserver, sipport);
+    PjsipManager::shareInstance()->makeCall(sipserver, sipport, _sipVideoWidget);
 
 }
 void MainWindow::onHangUp() {
-    log("onHangUp");
+    PjsipManager::shareInstance()->hangupAllCall();
+
+
 }

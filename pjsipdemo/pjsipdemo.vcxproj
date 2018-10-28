@@ -88,6 +88,9 @@
     <ClCompile Include="..\..\_protocbuf_parser\GeneratedFiles\Debug\moc_pjsipmanager.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\_protocbuf_parser\GeneratedFiles\Debug\moc_pjsuacall.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\_protocbuf_parser\GeneratedFiles\Debug\moc_pjvidwidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -101,6 +104,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\_protocbuf_parser\GeneratedFiles\Release\moc_pjsipmanager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\_protocbuf_parser\GeneratedFiles\Release\moc_pjsuacall.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\_protocbuf_parser\GeneratedFiles\Release\moc_pjvidwidget.cpp">
@@ -151,7 +157,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pjsipmanager\pjsuaaccount.h" />
-    <ClInclude Include="pjsipmanager\pjsuacall.h" />
+    <CustomBuild Include="pjsipmanager\pjsuacall.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing pjsuacall.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\_protocbuf_parser\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "..\..\_protocbuf_parser\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DQT_PRINTSUPPORT_LIB "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtPrintSupport" "-I.\pjsiplib\win32\include\pjlib" "-I.\pjsiplib\win32\include\pjlib-util" "-I.\pjsiplib\win32\include\pjmedia" "-I.\pjsiplib\win32\include\pjnath" "-I.\pjsiplib\win32\include\pjsip"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing pjsuacall.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\_protocbuf_parser\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "..\..\_protocbuf_parser\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DQT_PRINTSUPPORT_LIB "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtPrintSupport" "-I.\pjsiplib\win32\include\pjlib" "-I.\pjsiplib\win32\include\pjlib-util" "-I.\pjsiplib\win32\include\pjmedia" "-I.\pjsiplib\win32\include\pjnath" "-I.\pjsiplib\win32\include\pjsip"</Command>
+    </CustomBuild>
     <CustomBuild Include="pjsipmanager\pjvidwidget.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing pjvidwidget.h...</Message>

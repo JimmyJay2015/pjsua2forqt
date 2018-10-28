@@ -55,7 +55,7 @@ void PjsipManager::init() {
     }
 
     pj::EpConfig ecfg;
-    //ecfg.logConfig.level = 4;
+    ecfg.logConfig.level = 5;
     ecfg.uaConfig.maxCalls = 1;
     try {
         ep->libInit(ecfg);
@@ -131,6 +131,9 @@ QWidget *PjsipManager::startPreviewVideo() {
         return nullptr;
     }
 
+
+    stopPreviewVideo();
+
     pjsua_vid_win_id wid;
     pjsua_vid_win_info winfo;
     pj_status_t status;
@@ -146,8 +149,6 @@ QWidget *PjsipManager::startPreviewVideo() {
     wid = pjsua_vid_preview_get_win(PJMEDIA_VID_DEFAULT_CAPTURE_DEV);
     // 获取 winid 的 win info
     pjsua_vid_win_get_info(wid, &winfo);
-
-    stopPreviewVideo();
 
     // win info 中取出 hwnd，设为 QWidget 的子窗口
     PjvidWidget *previewVideo = new PjvidWidget((HWND)(winfo.hwnd.info.win.hwnd));
@@ -203,14 +204,19 @@ bool PjsipManager::createMyAccount(QString uid, QString name, QString sipserver,
         return false;
     }
 
+    emit log(QString("Account registed:%1").arg(acountID));
     return true;
 }
 
-bool PjsipManager::makeCall(QString server, qint32 serverport) {
-    
+bool PjsipManager::makeCall(QString server, qint32 serverport, QWidget *videoParent) {
+    if (!_inited) {
+        emit log("pjlib not init!");
+        return false;
+    }
+
     QString remoteid = QString("sip:%1@%2:%3").arg(rand()).arg(server).arg(serverport);
 
-    PjsuaCall *pc = new PjsuaCall(*_account);
+    PjsuaCall *pc = new PjsuaCall(*_account, videoParent);
 
     pj::CallOpParam prm(true);
     prm.opt.videoCount = 1;
@@ -222,9 +228,18 @@ bool PjsipManager::makeCall(QString server, qint32 serverport) {
         return false;
     }
 
+
     return true;
 }
 
+bool PjsipManager::hangupAllCall() {
+    if (!_inited) {
+        emit log("pjlib not init!");
+        return false;
+    }
+
+    pj::Endpoint::instance().hangupAllCalls();
+}
 
 
 

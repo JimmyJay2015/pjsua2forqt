@@ -73,6 +73,12 @@
     <ClCompile Include="pjsipmanager\pjvidwidget_win.cpp">
       <Filter>pjsipmanager</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\_protocbuf_parser\GeneratedFiles\Debug\moc_pjsuacall.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\_protocbuf_parser\GeneratedFiles\Release\moc_pjsuacall.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="mainwindow.h">
@@ -87,12 +93,12 @@
     <CustomBuild Include="pjsipmanager\pjvidwidget.h">
       <Filter>pjsipmanager</Filter>
     </CustomBuild>
+    <CustomBuild Include="pjsipmanager\pjsuacall.h">
+      <Filter>pjsipmanager</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pjsipmanager\pjsuaaccount.h">
-      <Filter>pjsipmanager</Filter>
-    </ClInclude>
-    <ClInclude Include="pjsipmanager\pjsuacall.h">
       <Filter>pjsipmanager</Filter>
     </ClInclude>
   </ItemGroup>

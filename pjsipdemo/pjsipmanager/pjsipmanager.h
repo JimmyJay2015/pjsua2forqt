@@ -51,7 +51,10 @@ public: // api
     bool stopPreviewVideo();
 
     bool createMyAccount(QString uid, QString name, QString sipserver, QString turnserver, qint32 turnport);
-    bool makeCall(QString server, qint32 serverport);
+    
+    bool makeCall(QString server, qint32 serverport, QWidget *videoParent);
+    bool hangupAllCall();
+
 
 public slots:
     void onPreviewDestoryed(QObject *obj);

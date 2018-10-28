@@ -40,7 +40,7 @@ void PjvidWidget::init() {
 }
 
 PjvidWidget::~PjvidWidget() {
-
+    qDebug() << ">>>>>>>>>>>>>>~PjvidWidget";
 }
 
 void PjvidWidget::resizeEvent(QResizeEvent *e) {

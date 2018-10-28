@@ -48,7 +48,8 @@ private:
 
     QPushButton *_previewBtn;
 
-    QWidget *_videoWidget;
+    QWidget *_previewVideoWidget;
+    QWidget *_sipVideoWidget;
 };
 
 #endif // TEST4_H
