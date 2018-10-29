@@ -199,7 +199,7 @@ QWidget *PjsipManager::startPreviewVideo() {
     pjsua_vid_win_get_info(wid, &winfo);
 
     // win info 中取出 hwnd，设为 QWidget 的子窗口
-    PjvidWidget *previewVideo = new PjvidWidget((HWND)(winfo.hwnd.info.win.hwnd));
+    PjvidWidget *previewVideo = new PjvidWidget(winfo.hwnd.info.win.hwnd);
     previewVideo->hide();
     previewVideo->init();
     _previewVideo = previewVideo;

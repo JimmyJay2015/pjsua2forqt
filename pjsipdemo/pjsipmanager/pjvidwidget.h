@@ -15,7 +15,7 @@
 class PjvidWidget : public QWidget {
     Q_OBJECT
 public:
-    explicit PjvidWidget(HWND vidWindow, QWidget *parent = nullptr);
+    explicit PjvidWidget(void *vidWindow, QWidget *parent = nullptr);
     ~PjvidWidget();
 
     void init();
@@ -24,7 +24,7 @@ protected:
     virtual void resizeEvent(QResizeEvent *) Q_DECL_OVERRIDE;
 
 private:
-    HWND _vidWindow;
+    void  *_vidWindow;
 
     QSize _originSize;
 };

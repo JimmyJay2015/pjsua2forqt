@@ -48,7 +48,7 @@ void PjsuaCall::onCallEnd() {
 void PjsuaCall::onVideoWindowReady(void *hwnd) {
     _releaseVideoWidget();
 
-    PjvidWidget *widget = new PjvidWidget((HWND)hwnd);
+    PjvidWidget *widget = new PjvidWidget(hwnd);
     _videoWidget = widget;
     widget->init();
     if (_videoParent) {
