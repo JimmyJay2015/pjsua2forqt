@@ -2,7 +2,6 @@
 .vscode
 *.VC.db
 *.opendb
-Win32/
 Debug/
 Release/
 pjsipdemo/Debug/
