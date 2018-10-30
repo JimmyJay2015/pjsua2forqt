@@ -22,11 +22,6 @@ CONFIG(release, debug|release) {
 }
 
 
-INCLUDEPATH += . \
-        ./build/GeneratedFiles \
-        ./pjsipdemo/pjsiplib/mac/include \
-        ./pjsipdemo/sdllib/mac/include \
-
 # Input
 HEADERS += ./pjsipdemo/mainwindow.h \
            ./pjsipdemo/pjsipmanager/pjsipmanager.h \
@@ -48,6 +43,9 @@ win32 {
 
 macx {
     SOURCES += ./pjsipdemo/pjsipmanager/pjvidwidget_mac.mm
+
+    INCLUDEPATH += ./pjsipdemo/pjsiplib/mac/include \
+        ./pjsipdemo/sdllib/mac/include \
 
     LIBS += -lstdc++ -framework CoreAudio -framework CoreServices -framework AudioUnit -framework AudioToolbox -framework Foundation -framework AppKit -framework AVFoundation -framework CoreGraphics -framework QuartzCore -framework CoreVideo -framework CoreMedia -framework VideoToolbox -L/Users/jimmy-zzm/Documents/pjsip/source2/build/lib -lSDL2 -lm -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal
 
@@ -79,8 +77,12 @@ macx {
 
 linux {
     SOURCES += ./pjsipdemo/pjsipmanager/pjvidwidget_linux.cpp
-    
+
+    INCLUDEPATH += "/usr/local/tdesktop/Qt-5.6.0/include/QtX11Extras"
+    LIBS += /usr/local/tdesktop/Qt-5.6.0/lib/libQt5X11Extras.a
+
     LIBS += $$system(pkg-config --cflags --libs libpjproject)
+
 }
 
 

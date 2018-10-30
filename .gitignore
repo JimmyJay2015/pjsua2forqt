@@ -6,4 +6,7 @@ Debug/
 Release/
 pjsipdemo/Debug/
 pjsipdemo/Release/
+Makefile
+build/
 
+pjsipdemo_plugin_import.cpp

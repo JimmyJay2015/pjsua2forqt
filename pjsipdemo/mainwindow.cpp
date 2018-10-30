@@ -92,6 +92,10 @@ void MainWindow::initTop() {
     connect(showCodec, &QPushButton::clicked, this, &MainWindow::onCodec);
     tsLayout->addWidget(showCodec);
 
+    QPushButton *showDevice = new QPushButton("device");
+    connect(showDevice, &QPushButton::clicked, this, &MainWindow::onDevide);
+    tsLayout->addWidget(showDevice);
+
     _previewBtn = new QPushButton("preview local video");
     _previewBtn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(_previewBtn, &QPushButton::clicked, this, &MainWindow::onPreview);
@@ -166,6 +170,10 @@ void MainWindow::onDestory() {
 }
 void MainWindow::onCodec() {
     log(PjsipManager::shareInstance()->codecInfoString());
+}
+
+void MainWindow::onDevide() {
+    log(PjsipManager::shareInstance()->deviceInfoString());
 }
 void MainWindow::onPreview() {
     if (PjsipManager::shareInstance()->stopPreviewVideo()) {

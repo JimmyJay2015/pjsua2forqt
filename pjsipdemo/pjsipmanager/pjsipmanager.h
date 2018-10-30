@@ -47,6 +47,7 @@ signals:
 public: // api
     QString pjLibVersion();
     QString codecInfoString();
+    QString deviceInfoString();
 
     QWidget *startPreviewVideo();
     bool stopPreviewVideo();

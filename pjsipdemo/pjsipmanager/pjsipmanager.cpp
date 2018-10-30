@@ -169,6 +169,46 @@ QString PjsipManager::codecInfoString() {
     return result;
 }
 
+QString PjsipManager::deviceInfoString() {
+
+    pjmedia_vid_dev_refresh();
+
+    QString result;
+    result.append("********** preview info ************\n");
+
+
+    pjmedia_vid_dev_info viddevs[100] = {0};
+    unsigned devcount = 100;
+
+    pj_status_t ret = pjsua_vid_enum_devs(viddevs, &devcount);
+
+    if (ret != PJ_SUCCESS) {
+        result.append(QString("enum video device failed:%1\n").arg(ret));
+    } else {
+        result.append(QString("there %1 video device\n").arg(devcount));
+
+        for (unsigned i = 0; i < devcount; i++)
+        {
+            pjmedia_vid_dev_info info = viddevs[i];
+            
+            result.append(QString(">>>id: %1\n").arg(info.id));
+            
+            std::string nameString(info.driver);
+            result.append(QString("name: %1\n").arg(QString::fromStdString(nameString)));
+
+            result.append(QString("caps: %1\n").arg(info.caps));
+
+            result.append(QString("fmt_cnt: %1\n").arg(info.fmt_cnt));
+            
+            result.append(">>>>>>>>>>>>>\n");
+        }
+    }
+
+
+    result.append("*********************************\n");
+    return result;
+}
+
 bool PjsipManager::stopPreviewVideo() {
     if (_previewVideo) {
         _previewVideo->setParent(nullptr);
@@ -207,7 +247,7 @@ QWidget *PjsipManager::startPreviewVideo() {
     pjsua_vid_win_get_info(wid, &winfo);
 
     // win info 中取出 hwnd，设为 QWidget 的子窗口
-    PjvidWidget *previewVideo = new PjvidWidget(winfo.hwnd.info.win.hwnd);
+    PjvidWidget *previewVideo = new PjvidWidget(winfo.hwnd.info.x11.window);
     previewVideo->hide();
     previewVideo->init();
     _previewVideo = previewVideo;

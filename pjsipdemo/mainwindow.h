@@ -31,6 +31,7 @@ public slots:
     void onInit();
     void onDestory();
     void onCodec();
+    void onDevide();
     void onPreview();
     void onRegister();
     void onCall();
