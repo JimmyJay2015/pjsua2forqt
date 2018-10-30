@@ -60,7 +60,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins;pjsiplib\win32\lib\debug;sdllib\lib;h264;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins;pjsiplib\win32\lib\debug;sdllib\win32\lib;h264\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;qtpcred.lib;platforms\qwindowsd.lib;qtharfbuzzngd.lib;Qt5PlatformSupportd.lib;Ws2_32.lib;imm32.lib;winmm.lib;qtfreetyped.lib;Qt5PrintSupportd.lib;libpjproject-i386-Win32-vc14-Debug.lib;SDL2.lib;version.lib;ws2_32.lib;openh264.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -76,7 +76,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins;pjsiplib\win32\lib\release;sdllib\lib;h264;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins;pjsiplib\win32\lib\release;sdllib\win32\lib;h264\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;qtpcre.lib;platforms\qwindows.lib;qtharfbuzzng.lib;qtfreetype.lib;Qt5PlatformSupport.lib;Qt5PrintSupport.lib;Ws2_32.lib;imm32.lib;winmm.lib;libpjproject-i386-Win32-vc14-Release-Static.lib;SDL2.lib;version.lib;ws2_32.lib;openh264.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>

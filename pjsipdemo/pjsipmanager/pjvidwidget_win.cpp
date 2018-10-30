@@ -12,30 +12,30 @@
 #include <windows.h>
 
 
-PjvidWidget::PjvidWidget(HWND vidWindow, QWidget *parent)
+PjvidWidget::PjvidWidget(void  *vidWindow, QWidget *parent)
 : QWidget(parent)
 , _vidWindow(vidWindow)
 , _originSize(0, 0)
 {
-    SetParent(_vidWindow, (HWND)winId());
+    SetParent((HWND)_vidWindow, (HWND)winId());
 
     RECT wr;
-    if (GetWindowRect(_vidWindow, &wr)) {
+    if (GetWindowRect((HWND)_vidWindow, &wr)) {
         _originSize = QSize(qMax(0L, wr.right - wr.left)
             , qMax(0L, wr.bottom - wr.top));
     }
 
-    ShowWindow(_vidWindow, SW_HIDE);
+    ShowWindow((HWND)_vidWindow, SW_HIDE);
 }
 void PjvidWidget::init() {
     if (!_originSize.isEmpty()) {
-        MoveWindow(_vidWindow, 0, 0, _originSize.width(), _originSize.height(), true);
+        MoveWindow((HWND)_vidWindow, 0, 0, _originSize.width(), _originSize.height(), true);
         resize(_originSize);
     } else {
-        MoveWindow(_vidWindow, 0, 0, 300, 300, true);
+        MoveWindow((HWND)_vidWindow, 0, 0, 300, 300, true);
         resize(300, 300);
     }
-    ShowWindow(_vidWindow, SW_SHOW);
+    ShowWindow((HWND)_vidWindow, SW_SHOW);
 }
 
 PjvidWidget::~PjvidWidget() {
@@ -49,7 +49,7 @@ void PjvidWidget::resizeEvent(QResizeEvent *e) {
     qint32 h = height();
 
     if (true || _originSize.isEmpty()) {
-        MoveWindow(_vidWindow, 0, 0, w, h, true);
+        MoveWindow((HWND)_vidWindow, 0, 0, w, h, true);
 
     } else {
 
