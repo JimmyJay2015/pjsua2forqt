@@ -35,7 +35,7 @@ public:
     static PjsipManager *shareInstance();
     ~PjsipManager();
 
-    void init();
+    void init(bool isTcp);
     void deinit();
 
 private:
@@ -62,6 +62,7 @@ public slots:
     
 private:
     bool _inited;
+    bool _isTcp;
 
     pj::TransportId _tid;
     pj::Account *_account;

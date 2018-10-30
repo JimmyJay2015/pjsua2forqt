@@ -24,11 +24,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(PjsipManager::shareInstance(), &PjsipManager::log, this, &MainWindow::log);
 
-    _server->setText("10.10.1.189");
-    _port->setText("5060");
+    _server->setText("117.78.36.159");
+    _port->setText("7060");
 
-    _protocol->setText("only udp");
-    _protocol->setDisabled(true);
+    _turnServer->setText("117.78.36.159");
+    _turnServerPort->setText("13478");
 
 }
 void MainWindow::initTop() {
@@ -42,9 +42,15 @@ void MainWindow::initTop() {
     tfLayout->addWidget(new QLabel("port"));
     _port = new QLineEdit("");
     tfLayout->addWidget(_port);
-    tfLayout->addWidget(new QLabel("protocol"));
-    _protocol = new QLineEdit("tcp or udp");
-    tfLayout->addWidget(_protocol);
+
+    _protocol = new QButtonGroup();
+    QRadioButton *tcp = new QRadioButton("tcp");
+    QRadioButton *udp = new QRadioButton("udp");
+    tcp->setChecked(true);
+    _protocol->addButton(tcp, 10086);
+    _protocol->addButton(udp, 10087);
+    tfLayout->addWidget(tcp);
+    tfLayout->addWidget(udp);
     topLayout->addLayout(tfLayout);
 
 
@@ -152,7 +158,8 @@ void MainWindow::log(QString msg) {
 }
 
 void MainWindow::onInit() {
-    PjsipManager::shareInstance()->init();
+    bool isTcp = (_protocol->checkedId() == 10086);
+    PjsipManager::shareInstance()->init(isTcp);
 }
 void MainWindow::onDestory() {
     PjsipManager::shareInstance()->deinit();

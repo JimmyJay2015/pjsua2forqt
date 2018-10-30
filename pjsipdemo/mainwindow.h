@@ -39,7 +39,7 @@ public slots:
 private:
     QLineEdit *_server;
     QLineEdit *_port;
-    QLineEdit *_protocol;
+    QButtonGroup *_protocol;
 
     QLineEdit *_turnServer;
     QLineEdit *_turnServerPort;

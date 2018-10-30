@@ -29,6 +29,8 @@ PjsipManager::PjsipManager() : QObject(nullptr)
 
 , _inited(false)
 
+, _isTcp(false)
+
 , _account(nullptr)
 
 , _previewVideo(nullptr)
@@ -41,7 +43,7 @@ PjsipManager::~PjsipManager() {
     deinit();
 }
 
-void PjsipManager::init() {
+void PjsipManager::init(bool isTcp) {
     if (_inited) {
         emit log(QString("pjlib already inited"));
         return;
@@ -67,8 +69,11 @@ void PjsipManager::init() {
 
     try {
         pj::TransportConfig tcfg;
-        //_tid = ep->transportCreate(PJSIP_TRANSPORT_TCP, tcfg);
-        _tid = ep->transportCreate(PJSIP_TRANSPORT_UDP, tcfg);
+        if (isTcp) {
+            _tid = ep->transportCreate(PJSIP_TRANSPORT_TCP, tcfg);
+        } else {
+            _tid = ep->transportCreate(PJSIP_TRANSPORT_UDP, tcfg);
+        }
     } catch (pj::Error &error) {
         emit log(QString("pjlib create transport failed: %1").arg(QString::fromStdString(error.info())));
         ep->libDestroy();
@@ -86,6 +91,7 @@ void PjsipManager::init() {
     emit log("pjlib started!");
 
     _inited = true;
+    _isTcp = isTcp;
 }
 
 void PjsipManager::deinit() {
@@ -93,6 +99,8 @@ void PjsipManager::deinit() {
         emit log("pjlib not init yet!");
         return;
     }
+
+    _isTcp = false;
 
     if (_account) {
         delete _account;
@@ -227,8 +235,8 @@ bool PjsipManager::createMyAccount(QString uid, QString name, QString sipserver,
 
     pj::AccountConfig acfg;
     acfg.idUri = acountID.toStdString();
-    //acfg.videoConfig.defaultCaptureDevice = PJMEDIA_VID_DEFAULT_CAPTURE_DEV;
-    //acfg.videoConfig.defaultRenderDevice = PJMEDIA_VID_DEFAULT_RENDER_DEV;
+    acfg.videoConfig.defaultCaptureDevice = PJMEDIA_VID_DEFAULT_CAPTURE_DEV;
+    acfg.videoConfig.defaultRenderDevice = PJMEDIA_VID_DEFAULT_RENDER_DEV;
     acfg.videoConfig.autoShowIncoming = PJ_TRUE;
     acfg.videoConfig.autoTransmitOutgoing = PJ_TRUE;
 
@@ -264,7 +272,8 @@ bool PjsipManager::makeCall(QString server, qint32 serverport, QString roomid, Q
     if (roomid.isEmpty()) {
         roomid.setNum(rand());
     }
-    QString remoteid = QString("sip:%1@%2:%3").arg(roomid).arg(server).arg(serverport);
+    QString remoteid = QString("sip:%1@%2:%3%4").arg(roomid).arg(server).arg(serverport).arg(_isTcp ? ";transport=tcp" : "");
+        emit log(QString("call: %1").arg(remoteid));
 
     PjsuaCall *pc = new PjsuaCall(*_account, videoParent);
 
