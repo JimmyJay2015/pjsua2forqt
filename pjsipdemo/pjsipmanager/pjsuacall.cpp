@@ -17,6 +17,7 @@
 #include <QLayout>
 
 
+
 PjsuaCall::PjsuaCall(pj::Account &acc, QWidget *videoParent, int call_id)
     : pj::Call(acc, call_id)
     , _videoParent(videoParent)
@@ -109,7 +110,15 @@ void PjsuaCall::onCallMediaState(pj::OnCallMediaStateParam &prm) {
             pjsua_vid_win_get_info(ci.media[i].videoIncomingWindowId, &wi);
 
             LOG(("found vid window, start video..."));
+
+#if defined(Q_OS_WIN)
             emit videoWindowReady(wi.hwnd.info.win.hwnd);
+#elif defined(Q_OS_MAC)
+            emit videoWindowReady(wi.hwnd.info.cocoa.window);
+#elif defined(Q_OS_LINUX)
+            emit videoWindowReady(wi.hwnd.info.x11.window);
+#endif
+
         }
     }
 

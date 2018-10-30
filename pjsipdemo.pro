@@ -42,6 +42,8 @@ win32 {
 }
 
 macx {
+    QMAKE_CXXFLAGS += -ObjC++
+    
     SOURCES += ./pjsipdemo/pjsipmanager/pjvidwidget_mac.mm
 
     INCLUDEPATH += ./pjsipdemo/pjsiplib/mac/include \
