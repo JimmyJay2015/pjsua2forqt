@@ -47,7 +47,7 @@ win32 {
 }
 
 macx {
-    SOURCES += ./pjsipdemo/pjsipmanager/pjvidwidget_mac.cpp
+    SOURCES += ./pjsipdemo/pjsipmanager/pjvidwidget_mac.mm
 
     #LIBS += -framework Cocoa -framework CoreAudio -framework AVFoundation \
     #        -framework AudioUnit -framework CoreVideo -framework CoreMedia
