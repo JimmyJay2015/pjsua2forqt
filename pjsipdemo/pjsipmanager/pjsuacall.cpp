@@ -13,8 +13,8 @@
 #include "pjsipmanager.h"
 #include "pjvidwidget.h"
 
-#include <QTimer.h>
-#include <QLayout.h>
+#include <QTimer>
+#include <QLayout>
 
 
 PjsuaCall::PjsuaCall(pj::Account &acc, QWidget *videoParent, int call_id)
