@@ -49,19 +49,11 @@ win32 {
 macx {
     SOURCES += ./pjsipdemo/pjsipmanager/pjvidwidget_mac.mm
 
-    #LIBS += -framework Cocoa -framework CoreAudio -framework AVFoundation \
-    #        -framework AudioUnit -framework CoreVideo -framework CoreMedia
-LIBS += -lstdc++ -framework CoreAudio -framework CoreServices -framework AudioUnit -framework AudioToolbox -framework Foundation -framework AppKit -framework AVFoundation -framework CoreGraphics -framework QuartzCore -framework CoreVideo -framework CoreMedia -framework VideoToolbox -L/Users/jimmy-zzm/Documents/pjsip/source2/build/lib -lSDL2 -lm -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal
+    LIBS += -lstdc++ -framework CoreAudio -framework CoreServices -framework AudioUnit -framework AudioToolbox -framework Foundation -framework AppKit -framework AVFoundation -framework CoreGraphics -framework QuartzCore -framework CoreVideo -framework CoreMedia -framework VideoToolbox -L/Users/jimmy-zzm/Documents/pjsip/source2/build/lib -lSDL2 -lm -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal
 
-LIBS += /usr/local/lib/libopus.a
-}
+    LIBS += /usr/local/lib/libopus.a
 
-linux {
-    SOURCES += ./pjsipdemo/pjsipmanager/pjvidwidget_linux.cpp
-}
-
-
-LIBS += ./pjsipdemo/h264/mac/libopenh264.a \
+    LIBS += ./pjsipdemo/h264/mac/libopenh264.a \
         ./pjsipdemo/sdllib/mac/lib/libSDL2.a \
         ./pjsipdemo/pjsiplib/mac/lib/libpjsua2-x86_64-apple-darwin16.7.0.a \
         ./pjsipdemo/pjsiplib/mac/lib/libpjsua-x86_64-apple-darwin16.7.0.a \
@@ -83,9 +75,13 @@ LIBS += ./pjsipdemo/h264/mac/libopenh264.a \
         ./pjsipdemo/pjsiplib/mac/lib/libilbccodec-x86_64-apple-darwin16.7.0.a \
         ./pjsipdemo/pjsiplib/mac/lib/libg7221codec-x86_64-apple-darwin16.7.0.a \
         ./pjsipdemo/pjsiplib/mac/lib/libpjlib-util-x86_64-apple-darwin16.7.0.a
+}
+
+linux {
+    SOURCES += ./pjsipdemo/pjsipmanager/pjvidwidget_linux.cpp
+    
+    LIBS += $$system(pkg-config --cflags --libs libpjproject)
+}
 
 
         
-
-
-RESOURCES += ./pjsipdemo/mainwindow.qrc
