@@ -1,0 +1,11 @@
+#    g++ -o $@ $ < `pkg-config --cflags --libs libpjproject`
+sdl: sdltest.cpp
+    g++ -o sdltest sdltest.cpp `sdl2-config --cflags --libs`
+
+pjsip： pjsua-video-test.cpp
+    g++ -o pjsua-video-test pjsua-video-test.cpp `pkg-config --cflags --libs libpjproject`
+
+all: sdl pjsip
+
+clean:
+    rm -f sdltest.o sdltest pjsua-video-test.o pjsua-video-test 
