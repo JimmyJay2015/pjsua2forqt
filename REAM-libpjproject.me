@@ -1,42 +1,59 @@
-静态编译 libpjproject
+@[TOC](目录)
 
-编译环境： ubuntu 16.04.3
+# 准备
 
-libpjproject 版本: 2.8
+## 编译环境
+	 ubuntu 16.04.3
 
-编译工具:
-1、gcc
-2、make
-3、autoconf
+## libpjproject 版本
+	2.8
+	https://www.pjsip.org/release/2.8/pjproject-2.8.tar.bz2
+	
+
+## 编译工具
+必备
+ - gcc
+ - make
+ - autoconf
 
 可选：
-1、wget
+ - wget
+ - git
 
 
-开始！
+# 依赖库
 
-1、video4linux2
+## video4linux2
 这个是 linux 视频设备的驱动，编译 pjsua 时 会有依赖。
 apt 安装即可。
 sudo apt-get install libv4l-dev
 
-2、SDL2
+## SDL2
 pjsua 本身只是协议栈，并不具备 音视频的显示播放功能，但它使用 SDL2 完成这样。
 SDL2 涉及视频和音频的功能，所以编译 SDL2 的时候，要加上对应的 driver 和 codec。
 需要注意的是， 没有这些，也不影响 SDL2 的编译，只不过编出来的库不支持这些 driver 和 codec，比如，用 pjsua2 preview video 时会报找不到对应的视频驱动、make Call 时会报找不到音频播放器。
 
-音频设备 pulse
-libasound-dev libpulse-dev
-视频设备  x11、opengl
-sudo apt-get install libx11-dev libxext-dev libgl-dev
+ - 音频驱动 pulse
+	```shell
+	sudo apt-get install libasound-dev libpulse-dev
+	```
+ - 视频驱动  x11、opengl
+	```shell
+	sudo apt-get install libx11-dev libxext-dev libgl-dev
+	```
 
-以上组件安装好了以后，就可以编译源码了
-wget http://www.libsdl.org/release/SDL2-2.0.7.tar.gz 
-tar -zxf SDL2-2.0.7.tar.gz 
-./autogen.sh
-./configure  --enable-shared=no
-
+以上组件安装好了以后，就可以编译源码了。
+### SDL2 编译
+```shell
+	wget http://www.libsdl.org/release/SDL2-2.0.7.tar.gz 
+	tar -zxf SDL2-2.0.7.tar.gz 
+	cd SDL2-2.0.7
+	./autogen.sh
+	./configure  --enable-shared=no
+```
+静态编译，所以带了参数 --enable-shared=no。
 configure 完成以后，会有 build  summary，留意一下：
+```
 SDL2 Configure Summary:
 Building Static Libraries
 Enabled modules : atomic audio video render events joystick haptic power filesystem threads timers file loadso cpuinfo assembly
@@ -51,31 +68,40 @@ Using dbus          : NO
 Using ime           : YES
 Using ibus          : NO
 Using fcitx         : NO
-
-可以看到上面安装的 视频设备、音频设备 都显示出来了。
+```
+可以看到，上面安装的 视频驱动 x11、opengl、音频驱动 alsa、pulse 都显示出来了。
 
 继续编译。
+```shell
 make
 sudo make install
-
+```
 至此，sdl2 编译完成。
 
-接下来写代码简单测试下
+### SDL2  测试
 sdltest.cpp:
+```c
 #include <SDL2/SDL.h>
 #include <iostream>
+
 using namespace std;
+
+
 int main () {
+	// 初始化
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
         cout<<"Unable to init SDL: " << SDL_GetError()<<endl;
         return 1;
     }
+    
+    // 打印视频驱动
     int sdldrinumb = SDL_GetNumVideoDrivers();
     cout<<"sdl video driver number: " << sdldrinumb<<endl;
     for (int i = 0; i < sdldrinumb; i++) {
        cout<<"sdl video driver " << i << " name: "<<  SDL_GetVideoDriver(i) << endl;
     }
   
+  	// 打印视频渲染驱动
     int sdlRender = SDL_GetNumRenderDrivers();
     cout<<"sdl render driver numer: " << sdldrinumb<<endl;
     for (int i = 0; i < sdldrinumb; i++) {
@@ -87,16 +113,21 @@ int main () {
             cout<<"sdl render  " << i << " name: "<<  ri.name << ", flag:"<< ri.flags <<endl;
         }
     }
+    
+    // 打印音频驱动
     int sdlAudioDriverNumber = SDL_GetNumAudioDrivers();
     cout<<"sdl audio driver number: " << sdlAudioDriverNumber<<endl;
     for (int i = 0; i < sdlAudioDriverNumber; i++) {
        cout<<"sdl audio driver " << i << " name: "<<  SDL_GetAudioDriver(i) << endl;
     }
+    
+    // 打印当前音频设备
     int audioPlayDeviceNumber = SDL_GetNumAudioDevices(0);
     cout<<"sdl audio play device number: " << audioPlayDeviceNumber<<endl;
     for (int i = 0; i < audioPlayDeviceNumber; i++) {
        cout<<"sdl audio play " << i << " name: "<<  SDL_GetAudioDeviceName(i, 0) << endl;
     }
+    
     int audioCaptureDeviceNumber = SDL_GetNumAudioDevices(1);
     cout<<"sdl audio capture device number: " << audioCaptureDeviceNumber<<endl;
     for (int i = 0; i < audioCaptureDeviceNumber; i++) {
@@ -104,10 +135,14 @@ int main () {
     }
     cout<<"end "<<endl;
 }
+```
 
+编译
+```shell
 g++ -o sdltest sdltest.cpp `sdl2-config --cflags --libs`
-
-代码看起来虽然多，但其实很简单，初始化 SDL 后，依次 取出 视频驱动、渲染驱动、音频驱动、正在使用的音频设备
+```
+代码看起来虽然多，但其实很简单，初始化 SDL 后，打印驱动信息：
+```
 sdl video driver number: 2
 sdl video driver 0 name: x11
 sdl video driver 1 name: dummy
@@ -126,67 +161,103 @@ sdl audio driver 4 name: dummy
 sdl audio play device number: -1
 sdl audio capture device number: -1
 end
+```
 
 从这个结果应该是要可以看到我们之前安装的那些依赖。
 如果没有标红的那几项，那接下来 pjsua 在使用的时候，会应该找不到对应的驱动而出错。
 
-3、libpjproject 
-pjsua2 其实是 pjsip 的 C++的接口。
-先来看看依赖，主要是视频编解码 openh264 、音频编解码 opus
+SDL2 编译完成。
 
-openh264
-openh264 是思科的 h264 编码的开源实现，使用了汇编加速，所以需要安装 nasm
+
+## openh264
+openh264 是思科的 h264 编码的开源实现。
+使用了汇编加速，所以需要安装 nasm。
+
+### nasm
+ubuntu apt 安装即可
+```shell
 sudo apt-get install nasm
-然后就是编译
-wget http://desktopdn.akeychat.cn/linux/tools/openh264.tar.gz
+```
+### 编译
+```shell
+git clone https://github.com/cisco/openh264.git
+cd openh264
 make libraries
 sudo make install-static
-opus
-直接编译
-wget http://desktopdn.akeychat.cn/linux/tools/opus-1.1.tar.gz
+```
+## opus
+开源音频编解码器。
+```shell
+wget https://archive.mozilla.org/pub/opus/opus-1.3.tar.gz
+tar -xzf opus-1.3.tar.gz
+cd opus-1.3
 ./configure --enable-shared=no
 make 
 sudo make install
-openssl
-如果 VOIP 要用到 tls 的话，还需要装 openssl。没要求的话，可以不装
-wget http://desktopdn.akeychat.cn/linux/tools/openssl-1.0.1u.tar.gz
- ./config --enable-shared=no
+```
+
+## openssl
+如果使用 libpjproject 进行网络通话是，需要加 tls，则需要 openssl
+```shell
+wget https://www.openssl.org/source/old/1.0.1/openssl-1.0.1u.tar.gz  
+tar -zxf openssl-1.0.1u.tar.gz
+cd openssl-1.0.1u
+./config --enable-shared=no
 make
 make install
+```
+--------------------------
+至此，所有依赖编译安装完成
 
-以上依赖安装完成以后，接下来就是编译 pjsip 了。
+
+# libpjproject 
+pjsua2 其实是 pjsip 的 C++的接口。
+
 先下载源码：
+```shell
 wget https://www.pjsip.org/release/2.8/pjproject-2.8.tar.bz2
-解压以后，如果需要支持视频，需要复制 pjlib/include/pj/config_site_sample.h 到 pjlib/include/pj/config_site.h ，然后在 pjlib/include/pj/config_site.h 末尾写入 #define PJMEDIA_HAS_VIDEO           1 
-
+tar -xjf pjproject-2.8.tar.bz2
+cd pjproject-2.8
+```
+如果要支持视频 
+```shell
 cp pjlib/include/pj/config_site_sample.h pjlib/include/pj/config_site.h
-echo "#define PJMEDIA_HAS_VIDEO           1 " >> pjlib/include/pj/config_site.h
-
+echo "#define PJMEDIA_HAS_VIDEO 1" >> pjlib/include/pj/config_site.h
+```
 预编译:
-./configure --disable-shared --disable-libwebrtc --disable-ffmpeg
+```shell
+./configure --disable-shared --disable-ffmpeg
+```
 如果编译了 openssl 的话， 加上 --with-ssl=[ssl path] 参数
-./configure --with-ssl=/usr/local/ssl --disable-shared --disable-libwebrtc --disable-ffmpeg
+```shell
+./configure --with-ssl=/usr/local/ssl --disable-shared --disable-ffmpeg
+```
 
 继续编译：
-make dep && make
+```shell
+make dep 
+make
 sudo make install
-
+```
+----
 至此 libpjproject 静态库编译完成。
-小测一下：
+
+# 测试
  pjsua-video-test.cpp
+```c
 #include <pjsua2.hpp>
 #include <SDL2/SDL.h>
 #include <iostream>
+
 using namespace pj;
+
+// 子类 PjsuaCall，主要用来连接音频设备
 class PjsuaCall : public Call {
 public:
     PjsuaCall(Account &acc, int call_id = PJSUA_INVALID_ID)
-    : Call(acc, call_id)
-    {
+    : Call(acc, call_id){
     }
-    virtual void onCallState(OnCallStateParam &prm) {
-        std::cout << "call state change"<<std::endl;
-    }
+    
     virtual void onCallMediaState(OnCallMediaStateParam &prm) {
         std::cout << "call media state change"<<std::endl;
         CallInfo ci = getInfo();
@@ -199,18 +270,12 @@ public:
 
                 aud_med->startTransmit(mgr.getPlaybackDevMedia());
                 mgr.getCaptureDevMedia().startTransmit(*aud_med);
-            }  else if (ci.media[i].type == PJMEDIA_TYPE_VIDEO && (ci.media[i].dir & PJMEDIA_DIR_DECODING))   {
-                pjsua_vid_win_info wi;
-                pjsua_vid_win_get_info(ci.media[i].videoIncomingWindowId, &wi);
-                std::cout << "found vid window, start video...";
-            }
+            } 
         }
     }
-    virtual void onInstantMessage(OnInstantMessageParam &prm) {
-        std::cout << "call Instant Message"<<std::endl;
-    }
 };
-// 预览视频
+
+// 测试-预览本机视频
 bool testVideoPreview(Endpoint &ep) {
 	pj_status_t status = pjsua_vid_preview_start(PJMEDIA_VID_DEFAULT_CAPTURE_DEV, NULL);
     if (status != PJ_SUCCESS) {
@@ -219,22 +284,27 @@ bool testVideoPreview(Endpoint &ep) {
     }
     return true;
 }
-// 测试视频通话
+
+// 测试-视频通话
 bool testMakeCall(Endpoint &ep, TransportId &tid) {
     // create account
     std::string localAddr = ep.transportGetInfo(tid).localName;
-    std::string myAccoutID = "jimmy<sip:111111@" + localAddr +">";
+    std::string myAccoutID = "myname<sip:myid@" + localAddr +">";
     std::cout << "myAccoutID:" << myAccoutID;
+    
     AccountConfig acfg;
     acfg.idUri = myAccoutID;
     acfg.videoConfig.defaultCaptureDevice = PJMEDIA_VID_DEFAULT_CAPTURE_DEV;
     acfg.videoConfig.defaultRenderDevice = PJMEDIA_VID_DEFAULT_RENDER_DEV;
     acfg.videoConfig.autoShowIncoming = PJ_TRUE;
     acfg.videoConfig.autoTransmitOutgoing = PJ_TRUE;
-    acfg.natConfig.iceEnabled = true;
-    acfg.natConfig.turnEnabled = true;
-    acfg.natConfig.turnServer = "turn server ip:port";
-    acfg.natConfig.turnConnType = PJ_TURN_TP_UDP;
+    //// 如果配置了 turn server 
+    //acfg.natConfig.iceEnabled = true;
+    //acfg.natConfig.turnEnabled = true;
+    //acfg.natConfig.turnServer = "turn server ip:port";
+    //// turn server 一般是 udp
+    //acfg.natConfig.turnConnType = PJ_TURN_TP_UDP;
+    
     Account myAcc;
     try {
         myAcc.create(acfg, true);
@@ -242,13 +312,17 @@ bool testMakeCall(Endpoint &ep, TransportId &tid) {
         std::cout << "create account failed:" << error.info() << std::endl;
         return false;
     }
-    /////////////////////
+    
     // make call
     std::string remoteid = "sip:roomid@sip server:port;transport=tcp";
+    //// rtcp 使用 tcp
+    //std::string remoteid = "sip:roomid@sip server:port;transport=tcp";
     std::cout << "remoteid:"<< remoteid << std::endl;
+    
     PjsuaCall cl(myAcc);
     CallOpParam prm(true);
     prm.opt.videoCount = 1;
+    
     try {
         cl.makeCall(remoteid, prm);
     } catch (pj::Error &error) {
@@ -257,10 +331,13 @@ bool testMakeCall(Endpoint &ep, TransportId &tid) {
     }
     return true;
 }
+
+// 测试-打印 libpjproject 支持的库
 bool testDevices(Endpoint &ep) {
     std::cout << "********* video device info ************" << std::endl;;
     pjmedia_vid_dev_info viddevs[100] = {0};
     unsigned devcount = 100;
+    
     pj_status_t ret = pjsua_vid_enum_devs(viddevs, &devcount);
     if (ret != PJ_SUCCESS) {
         std::cout << "enum video device failed: " << ep.utilStrError(ret) << std::endl;
@@ -277,9 +354,12 @@ bool testDevices(Endpoint &ep) {
             std::cout << "----------------" << std::endl;
         }
     }
+
+
     std::cout << "********** video codec info ************" << std::endl;
     pjsua_codec_info videoCodecs[100] = {0};
     unsigned videoCount = 100;
+    
     ret = pjsua_vid_enum_codecs(videoCodecs, &videoCount);
     if (ret != PJ_SUCCESS) {
         std::cout << "enum video codecs failed: " << ep.utilStrError(ret) << std::endl;
@@ -296,9 +376,12 @@ bool testDevices(Endpoint &ep) {
             std::cout << "----------------" << std::endl;
         }
     }
+
+
     std::cout << "********** audio device info ************" << std::endl;
     pjmedia_aud_dev_info audioDevices[100] = {0};
     unsigned audioDeviceCount = 100;
+    
     ret = pjsua_enum_aud_devs(audioDevices, &audioDeviceCount);
     if (ret != PJ_SUCCESS) {
         std::cout << "enum audio device failed: " << ep.utilStrError(ret) << std::endl;
@@ -316,9 +399,12 @@ bool testDevices(Endpoint &ep) {
             std::cout << "----------------" << std::endl;
         }
     }
+
+
     std::cout << "********** audio codec info ************" << std::endl;
     pjsua_codec_info audioCodecs[100] = { 0 };
     unsigned audioCount = 100;
+    
     ret = pjsua_enum_codecs(audioCodecs, &audioCount);
     if (ret != PJ_SUCCESS) {
         std::cout << "enum audio codecs failed: " << ep.utilStrError(ret) << std::endl;
@@ -334,27 +420,35 @@ bool testDevices(Endpoint &ep) {
             std::cout << "----------------" << std::endl;
         }
     }
+    
     std::cout << "*********************************" << std::endl;
     return true;
 }
+
 int main() {
+	// 初始化 SDL 库
 	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
         std::cout << SDL_GetError() << std::endl;
         return 1;
     }
+    
     Endpoint ep;
     ep.libCreate();
+    
     // 初始化 Endpoint
     EpConfig ep_conf;
     ep.libInit(ep_conf);
+    
     // 初始化 sip  Transport，简单处理 错误
     TransportId tid;
     TransportConfig tcfg;
+    // sip server 默认端口 5060
     tcfg.port = 5060;
     try  {
-        // 使用 udp
-        //ep.transportCreate(PJSIP_TRANSPORT_UDP, tcfg);
-        tid = ep.transportCreate(PJSIP_TRANSPORT_TCP, tcfg);
+        // rtcp 使用 udp
+        tid = ep.transportCreate(PJSIP_TRANSPORT_UDP, tcfg);
+        //// rtcp 使用 tcp
+        //tid = ep.transportCreate(PJSIP_TRANSPORT_TCP, tcfg);
     }   catch (Error &error)   {
         std::cout << error.info() << std::endl;
         return 1;
@@ -362,22 +456,24 @@ int main() {
     // 启动 pjsua lib 库( 轮询 pjsip 的工作线程等)
     ep.libStart();
     std::cout << "***  pjsua2 started ***" << std::endl;
+
+	// libpjproject 版本
     std::cout << "veision: " << pj::Endpoint::instance().libVersion().full << std::endl;
     bool ret = true;
     
     // 设备测试 
     ret = testDevices(ep);
-    ////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////
 
     //// 预览测试 10 秒
     ret = testVideoPreview(ep);
     pj_thread_sleep(1000 * 10);
-    ////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////
 
     //// 通话测试 1 分钟
     //ret = testMakeCall(ep, tid);
     //pj_thread_slee1000 * 60));
-    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////
 
     if (ret) {
         std::cout << "***  pjsua2 succeed ***" << std::endl;
@@ -386,13 +482,15 @@ int main() {
     }        
     return 0;
 }
-
+```
 
 编译：
+```shell
 g++ pjsua-video-test.cpp `pkg-config --cflags --libs libpjproject`
-当前测试，只是打印设备信息，以及预览本地视频，要视频通话的话，需要提供 sip 服务器。
+```
 
 打印信息如下：
+```
 ********* video device info ************
 video device count: 3
 video index: 0
@@ -527,12 +625,10 @@ audio codec index: 10
 audio codec id: L16/44100/1
 audio codec description: 
 ----------------
+```
 
-标红的就是我们之前安装的，其他一些不同平台可能有所不同，但影响不大。
+不同平台可能有所不同，但一定会有 SDL、H264、pulse、opus 这四个。
+其他影响不大。
 
 至此，支持视频的 libpjproject 的静态库编译完成！
-
-
-
-
 
