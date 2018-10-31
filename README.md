@@ -1,4 +1,4 @@
-"# pjsua2 for qt" 
+# pjsua2 for qt
 
 pjsua2 的 Qt 封装。
 
