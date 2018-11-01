@@ -35,6 +35,8 @@ PjsipManager::PjsipManager() : QObject(nullptr)
 
 , _previewVideo(nullptr)
 
+, _mycall(nullptr)
+
 {
 	
 }
@@ -101,6 +103,8 @@ void PjsipManager::deinit() {
     }
 
     _isTcp = false;
+
+    hangupAllCall();
 
     if (_account) {
         delete _account;
@@ -315,19 +319,25 @@ bool PjsipManager::makeCall(QString server, qint32 serverport, QString roomid, Q
         emit log("pjlib not init!");
         return false;
     }
+
+    if (_mycall) {
+        emit log("you are in call!");
+        return false;
+    }
+
     if (roomid.isEmpty()) {
         roomid.setNum(rand());
     }
     QString remoteid = QString("sip:%1@%2:%3%4").arg(roomid).arg(server).arg(serverport).arg(_isTcp ? ";transport=tcp" : "");
         emit log(QString("call: %1").arg(remoteid));
 
-    PjsuaCall *pc = new PjsuaCall(*_account, videoParent);
+    _mycall = new PjsuaCall(*_account, videoParent);
 
     pj::CallOpParam prm(true);
     prm.opt.videoCount = 1;
 
     try {
-        pc->makeCall(remoteid.toStdString(), prm);
+        _mycall->makeCall(remoteid.toStdString(), prm);
     } catch (pj::Error &error) {
         emit log(QString("make call failed: %1").arg(QString::fromStdString(error.info())));
         return false;
@@ -343,7 +353,18 @@ bool PjsipManager::hangupAllCall() {
         return false;
     }
 
-    pj::Endpoint::instance().hangupAllCalls();
+    if (_mycall) {
+        pj::CallOpParam op;
+        op.statusCode = PJSIP_SC_DECLINE;
+        try {
+            _mycall->hangup(op);
+        } catch (pj::Error &error) {
+            emit log(QString("hung up call failed: %1").arg(QString::fromStdString(error.info())));
+            return false;
+        }
+        _mycall = nullptr;
+    }
+    return true;
 }
 
 

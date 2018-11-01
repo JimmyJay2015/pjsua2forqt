@@ -22,12 +22,7 @@ class PjsipEndpoint : public pj::Endpoint {
 };
 
 
-class PjsipBuddy : public pj::Buddy {
-
-};
-
-
-
+class PjsuaCall;
 
 class PjsipManager : public QObject  {
     Q_OBJECT
@@ -69,6 +64,8 @@ private:
     pj::Account *_account;
 
     QWidget *_previewVideo;
+
+    PjsuaCall *_mycall;
 };
 
 #endif
