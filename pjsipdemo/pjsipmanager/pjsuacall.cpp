@@ -27,9 +27,12 @@ PjsuaCall::PjsuaCall(pj::Account &acc, QWidget *videoParent, int call_id)
     connect(this, &PjsuaCall::videoWindowReady, this, &PjsuaCall::onVideoWindowReady);
 
     connect(this, &PjsuaCall::callEnd, this, &PjsuaCall::onCallEnd);
+    connect(this, &PjsuaCall::callReject, this, &PjsuaCall::onCallEnd);
 }
 
 PjsuaCall::~PjsuaCall() {
+    LOG("~PjsuaCall");
+    _releaseVideoWidget();
 }
 
 void PjsuaCall::setVideoParent(QWidget *videoParent) {
@@ -39,7 +42,7 @@ void PjsuaCall::setVideoParent(QWidget *videoParent) {
 void PjsuaCall::_releaseVideoWidget() {
     if (_videoWidget) {
         _videoWidget->setParent(nullptr);
-        _videoWidget->deleteLater();
+        //_videoWidget->deleteLater();
         _videoWidget = 0;
     }
 }
